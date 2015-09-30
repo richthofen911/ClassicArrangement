@@ -3,17 +3,20 @@ package io.ap1.braveheart;
 import android.app.Application;
 
 import io.ap1.braveheart.Utils.APICaller;
+import io.ap1.braveheart.Utils.AppSettings;
 import io.ap1.braveheart.Utils.MySingletonRequestQueue;
 
 /**
  * Created by Admin on 28/09/2015.
  */
 public class MyApplication extends Application {
-    public static APICaller apiCaller;
-    public static MySingletonRequestQueue mRequestQueue;
+    public APICaller apiCaller;
+    public MySingletonRequestQueue mRequestQueue;
+    public AppSettings appSettings;
 
     public void onCreate(){
         super.onCreate();
+        appSettings = new AppSettings(getApplicationContext());
         mRequestQueue = MySingletonRequestQueue.getInstance(this);
         apiCaller = APICaller.getInstance(this, mRequestQueue);
     }
@@ -24,5 +27,9 @@ public class MyApplication extends Application {
 
     public APICaller getApiCaller(){
         return apiCaller;
+    }
+
+    public AppSettings getAppSettings(){
+        return appSettings;
     }
 }

@@ -21,10 +21,10 @@ public class FragmentPrompt extends DialogFragment implements View.OnClickListen
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         View view =  inflater.inflate(R.layout.fragment_prompt, container);
 
-        view.findViewById(R.id.btn_pullVideo).setOnClickListener(this);
-        view.findViewById(R.id.btn_doSurvey).setOnClickListener(this);
-        view.findViewById(R.id.btn_justPerk).setOnClickListener(this);
-        view.findViewById(R.id.btn_cancelPrompt).setOnClickListener(this);
+        view.findViewById(R.id.btn_signUp).setOnClickListener(this);
+        view.findViewById(R.id.btn_shareToOthers).setOnClickListener(this);
+        view.findViewById(R.id.btn_notInterested).setOnClickListener(this);
+        view.findViewById(R.id.btn_showNextTime).setOnClickListener(this);
 
         return view;
     }
@@ -32,23 +32,23 @@ public class FragmentPrompt extends DialogFragment implements View.OnClickListen
     @Override
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.btn_pullVideo:
+            case R.id.btn_signUp:
                 //play video
-                ((ActivityMain) getActivity()).pullVideo();
+                ((ActivityMain) getActivity()).signUp();
                 dismiss();
                 break;
-            case R.id.btn_doSurvey:
+            case R.id.btn_shareToOthers:
                 //do survey
-                ((ActivityMain) getActivity()).doSurvey();
+                ((ActivityMain) getActivity()).shareToOthers();
                 dismiss();
                 break;
-            case R.id.btn_justPerk:
+            case R.id.btn_notInterested:
                 //call url
-                ((ActivityMain) getActivity()).getPerk();
+                ((ActivityMain) getActivity()).notInterested();
                 dismiss();
                 break;
-            case R.id.btn_cancelPrompt:
-                ((ActivityMain) getActivity()).cancelPrompt();
+            case R.id.btn_showNextTime:
+                ((ActivityMain) getActivity()).showNextTime();
                 dismiss();
                 break;
         }

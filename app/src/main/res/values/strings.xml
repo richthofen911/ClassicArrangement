@@ -4,4 +4,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_activity_main">ActivityMain</string>
+    <string name="prompt_opt1">Sign up</string>
+    <string name="prompt_opt2">Share this to my friend</string>
+    <string name="prompt_opt3">Not interested</string>
+    <string name="prompt_opt4">Show me next time</string>
+    <string name="btn_startScanning">Start Scanning</string>
+    <string name="btn_stopScanning">Stop Scanning</string>
 </resources>
