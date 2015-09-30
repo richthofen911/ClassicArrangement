@@ -93,8 +93,8 @@ public class ActivityLogin extends AppCompatActivity {
                 if(!appSettings.hasHadResponseDelivered())//if AppSettings didn't get right result, cancel it
                     appSettings.cancelSettingsRequest();
                 startActivity(new Intent(ActivityLogin.this, ActivityMain.class)
-                        .putExtra("networkStatus", appSettings.getNetworkStatus()))
-                        .putExtra("UserID", userId);
+                        .putExtra("networkStatus", appSettings.getNetworkStatus())
+                        .putExtra("UserID", userId));
                 finish();
             }
         });
