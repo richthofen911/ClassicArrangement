@@ -1,6 +1,7 @@
 package io.ap1.braveheart;
 
 import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -13,19 +14,13 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.perples.recosdk.RECOBeacon;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -37,7 +32,7 @@ import io.ap1.braveheart.Utils.ActivityBeaconDetectionByRECO;
 import io.ap1.braveheart.Utils.MySingletonRequestQueue;
 
 public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.OnClickListener{
-
+//???? does BraveHeart project work with firebase?, if not, remove all firebase related stuff
     // TODO: change this to your own Firebase URL
     public static String url_firebaseServer;
     public static String url_video_prefix;
@@ -79,11 +74,12 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
     FragmentTransaction ft;
     FragmentPrompt fragmentPrompt;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BluetoothAdapter.getDefaultAdapter().enable(); //force enabling bluetooth
 
         myApplication = (MyApplication)getApplication();
 
@@ -102,8 +98,6 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         assignRegionArgs(UUID_AprilBrother, 99, -65); //April Beacons with minor of 1 and 2.
         //assignRegionArgs(UUID_Reco, 9876, -80); //Krishna's Reco beacon. Just assigned here as a test.
         //assignRegionArgs(UUID_Reco, 7000, -70); //Reco beacons for canadian tire
-
-
 
         //wv_video = (WebView) findViewById(R.id.wv_video);
         tvStatus = (TextView) findViewById(R.id.tv_status);
@@ -251,31 +245,15 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         });
     }
 
-    private void sendCheckInRequest(String macAddress, String uuid, String major, String minor, String proximity, String accuracy){
-        requestCheckin = new StringRequest(Request.Method.GET, url_check_in_prefix + macAddress + "&uuid=" + uuid + "&major=" + major +
-                "&minor=" + minor + "&proximity=" + proximity + "&accuracy" + accuracy, new Response.Listener<String>() {
+    private void checkOut() {
+        apiCaller.setAPI(urlBase, "urlPath", "?userid=" + userId, Request.Method.GET); //check in
+        apiCaller.execAPI(new APICaller.VolleyCallback() {
             @Override
-            public void onResponse(String response) {
-                requestCheckin.markDelivered();
-                response = response.replace("\\", "");
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    //potential check here
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener(){
-            @Override
-            public void onErrorResponse(VolleyError error){
-                requestCheckin.markDelivered();
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
+            public void onDelivered(String result) {
+                Log.e("response", result);
             }
         });
-        requestCheckin.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingletonRequestQueue.getInstance(this).add(requestCheckin); //execute request
     }
-
 
     public void signUp(){
         waitForClickEventOnPrompt.cancel();
@@ -293,12 +271,12 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
 
     public void shareToOthers(){
         waitForClickEventOnPrompt.cancel();
-        //do survey
+        //
     }
 
     public void notInterested(){
         waitForClickEventOnPrompt.cancel();
-        //get perk
+        Toast.makeText(getApplicationContext(), "Thank you for your participation", Toast.LENGTH_SHORT).show();
     }
 
     public void showNextTime(){ //this method is just for removing the 'waitForClickEventOnPrompt' timer
@@ -307,7 +285,6 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
 
     @Override
     protected void onDestroy() {
-        //rootRef.removeValue(); //Removes ALL Firebase records. Really sensitive.
         for (int i = 0; i < firebaseIDs.size(); i++) //Should remove all Firebase IDs that the phone created through the app.
             rootRef.child(firebaseIDs.get(i)).removeValue();
         super.onDestroy();
