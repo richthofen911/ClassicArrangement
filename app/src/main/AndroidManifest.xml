@@ -30,6 +30,8 @@
             android:label="@string/title_activity_activity_main"
             android:screenOrientation="portrait">
         </activity>
+
+        <service android:name="com.perples.recosdk.RECOBeaconService" />
     </application>
 
 </manifest>

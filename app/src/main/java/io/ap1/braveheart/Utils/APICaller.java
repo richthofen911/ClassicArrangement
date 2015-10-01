@@ -8,9 +8,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
-/**
- * Created by Tuotuo on 13/09/2015.
- */
 public class APICaller {
     private String APIUrlStr;
     private String APIUrlEncoded;
@@ -65,7 +62,7 @@ public class APICaller {
                 @Override
                 public void onErrorResponse(VolleyError error){
                     requestCallAPI.markDelivered();
-                    callback.onDelivered(error.toString());
+                    callback.onDelivered(error.toString() + " Status Code: " + error.networkResponse.statusCode);
                 }
             });
             requestQueue.add(requestCallAPI);

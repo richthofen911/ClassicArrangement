@@ -7,9 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
-/**
- * Created by Tuotuo on 28/09/2015.
- */
 public class FragmentPrompt extends DialogFragment implements View.OnClickListener{
     public FragmentPrompt() {
         // Required empty public constructor
@@ -33,17 +30,14 @@ public class FragmentPrompt extends DialogFragment implements View.OnClickListen
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btn_signUp:
-                //play video
-                ((ActivityMain) getActivity()).signUp();
+                ((ActivityMain) getActivity()).signUp(); //call the method in the host Activity
                 dismiss();
                 break;
             case R.id.btn_shareToOthers:
-                //do survey
                 ((ActivityMain) getActivity()).shareToOthers();
                 dismiss();
                 break;
             case R.id.btn_notInterested:
-                //call url
                 ((ActivityMain) getActivity()).notInterested();
                 dismiss();
                 break;

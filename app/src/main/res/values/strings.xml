@@ -11,4 +11,5 @@
     <string name="btn_startScanning">Start Scanning</string>
     <string name="btn_stopScanning">Stop Scanning</string>
     <string name="tv_status_default">Scanning status: OFF</string>
+    <string name="tv_loggingIn">Logging in</string>
 </resources>

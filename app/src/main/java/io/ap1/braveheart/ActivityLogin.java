@@ -8,9 +8,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -21,20 +25,24 @@ import io.ap1.braveheart.Utils.AppSettings;
 public class ActivityLogin extends AppCompatActivity {
 
     private WebView wv_display;
-    private MyJavaScriptInterface myJavaScriptInterface;
+    //private MyJavaScriptInterface myJavaScriptInterface;
     private String isLogin;
     private SharedPreferences spLoginStatus;
+    private TextView tvLoggingIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        tvLoggingIn = (TextView) findViewById(R.id.tv_loggingIn);
+
         if(((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo() == null)
             Toast.makeText(getApplicationContext(), "Network is currently unavailable", Toast.LENGTH_SHORT).show();
         spLoginStatus = getApplication().getSharedPreferences("LoginStatus", 0);
         isLogin = spLoginStatus.getString("isLogin", "no");
 
-        myJavaScriptInterface = new MyJavaScriptInterface(this);
+        MyJavaScriptInterface myJavaScriptInterface = new MyJavaScriptInterface(this);
 
         String url = "http://104.236.111.213/aloha/dashboard/whoami.php";
 
@@ -45,17 +53,18 @@ public class ActivityLogin extends AppCompatActivity {
         wv_display.addJavascriptInterface(myJavaScriptInterface, "HtmlViewer");
     }
 
-
     private class SSOWebViewClient extends WebViewClient {
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             if(url.equals("http://104.236.111.213/aloha/dashboard/whoami.php") && isLogin.equals("yes")){
+                view.setVisibility(View.INVISIBLE);
                 view.loadUrl("javascript:HtmlViewer.showHTML" +
                         "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
             }
             if(url.equals("http://104.236.111.213/aloha/dashboard/whoami.php?from_sso_server=1")){
+                view.setVisibility(View.INVISIBLE);
                 view.loadUrl("javascript:HtmlViewer.showHTML" +
                         "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
                 spLoginStatus.edit().putString("isLogin", "yes").commit(); //this value need to be written in local file, integrate it in the settings module.
@@ -91,7 +100,7 @@ public class ActivityLogin extends AppCompatActivity {
                     Log.e("count settings err", e.toString());
                 }
                 if(!appSettings.hasHadResponseDelivered())//if AppSettings didn't get right result, cancel it
-                    appSettings.cancelSettingsRequest();
+                    appSettings.cancelSettingsRequest(); //but don't forget it deal with it in the Main Activity
                 startActivity(new Intent(ActivityLogin.this, ActivityMain.class)
                         .putExtra("networkStatus", appSettings.getNetworkStatus())
                         .putExtra("UserID", userId));
@@ -112,14 +121,13 @@ public class ActivityLogin extends AppCompatActivity {
 
         @JavascriptInterface
         public void showHTML(String html){
-            String json = html.substring(25, 51);
-            Log.e("resp content", json);
+            Log.e("resp raw", html);
+            String json = html.substring(25, html.length() - 7);
+            Log.e("resp json", json);
             try{
                 JSONObject jsonObject = new JSONObject(json);
                 userId = jsonObject.getString("UserID");
                 //loginStatus = jsonObject.get("isLogin");
-
-                //startActivity(new Intent(ActivityLogin.this, ActivityMain.class).putExtra("UserID", userId));
                 checkAppSettings(userId);
             }catch (JSONException e){
                 e.printStackTrace();

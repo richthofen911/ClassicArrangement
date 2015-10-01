@@ -15,7 +15,7 @@
         android:background="#FFAD33"
         android:padding="10dp"
         android:textColor="#FFFFFF"
-        android:text="                                            " />
+        android:text="                 Options                      " />
 
     <Button
         android:id="@+id/btn_signUp"
