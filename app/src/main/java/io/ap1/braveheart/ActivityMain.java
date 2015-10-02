@@ -22,6 +22,9 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.perples.recosdk.RECOBeacon;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Timer;
@@ -60,12 +63,18 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //BluetoothAdapter.getDefaultAdapter().enable(); //force enabling bluetooth
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bluetoothAdapter != null)
+            bluetoothAdapter.enable(); // if Bluetooth Adapter exists, force enabling it.
+        else
+            Toast.makeText(getApplicationContext(), "Bluetooth chip not found", Toast.LENGTH_SHORT).show();
 
         myApplication = (MyApplication)getApplication();
 
+        /* BraveHeart project doesn't use AppSettings temporarily
         if(getIntent().getStringExtra("networkStatus").equals("bad")) //ActivityLogin check network and shows feedback here
             Toast.makeText(getApplicationContext(), "Network is currently unavailable", Toast.LENGTH_SHORT).show();
+        */
         userId = getIntent().getStringExtra("UserID");
 
         //getLocalSettings(); //read settings data from SharedPreferences file
@@ -74,7 +83,7 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         //mySingletonRequestQueue = myApplication.getMyRequestQueue();
 
         //The Reco Region arguments, different for the type of beacons.
-        assignRegionArgs(UUID_AprilBrother, 99, -65); //April Beacons with minor of 1 and 2.
+        assignRegionArgs(UUID_AprilBrother, 90, 90, -65); //April Beacons with minor of 1 and 2.
         //assignRegionArgs(UUID_Reco, 9876, -80); //Krishna's Reco beacon. Just assigned here as a test.
         //assignRegionArgs(UUID_Reco, 7000, -70); //Reco beacons for canadian tire
 
@@ -91,9 +100,6 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         */
-
-
-
     }
 
     private void getLocalSettings(){
@@ -103,20 +109,22 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
     public void onClick(View v){  //the method implemented for interface View.OnClickListener
         switch (v.getId()){
             case R.id.btn_startScanning:
-                //start(definedRegions);
-                String checkInBeaconTemp = "&uuid=1&major=1&minor=1";
+                start(definedRegions);
+                /*
+                String checkInBeaconTemp = "&uuid=1&major=1&minor=1"; // this is for debug testing
                 apiCaller.setAPI(urlBase, "/checkin.php", "?userid=" + userId + checkInBeaconTemp, Request.Method.GET); //this
                 apiCaller.execAPI(new APICaller.VolleyCallback() { //is
                     @Override                                      // for debugging
                     public void onDelivered(String result) {       // delete the
-                        Log.e("resp checkin", result);
-                        ft = getFragmentManager().beginTransaction();
-                        fragmentPrompt = new FragmentPrompt();
-                        ft.add(fragmentPrompt, "FragmentPrompt");
-                        ft.commit();// check in
+                        Log.e("resp checkin", result); // this is for debug testing
+                        ft = getFragmentManager().beginTransaction(); // this is for debug testing
+                        fragmentPrompt = new FragmentPrompt(); // this is for debug testing
+                        ft.add(fragmentPrompt, "FragmentPrompt"); // this is for debug testing
+                        ft.commit();                              // check in
                         ft.show(fragmentPrompt);                   // here
                     }                                              // when
                 });                                                // done
+                */
                 tvStatus.setText("Scanning status: ON");
                 break;
             case R.id.btn_stopScanning:
@@ -131,18 +139,36 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
         Toast.makeText(getApplicationContext(), "beacon detected: " + recoBeacon.getMinor(), Toast.LENGTH_SHORT).show();
         //check in with AprilBrother beacon's UUID, change to  UUID_Reco if when using RECO beacon
         //sendCheckInRequest(macAddress, UUID_AprilBrother, String.valueOf(recoBeacon.getMajor()), String.valueOf(recoBeacon.getMinor()), "1", "1");
-        apiCaller.setAPI(urlBase, "/checkin.php", "?userid=" + userId, Request.Method.GET); //check in
+        apiCaller.setAPI(urlBase, "/checkin.php", "?userid=" + userId + "&screen=Screen1" +
+                "&uuid=E2C56DB5DFFB48D2B060D0F5A71096E0&major=99&minor=101&debug=1", Request.Method.GET); //check in
         apiCaller.execAPI(new APICaller.VolleyCallback() {
             @Override
             public void onDelivered(String result) {
                 Log.e("resp checkin", result);
-                ft.show(fragmentPrompt);
+                try{
+                    JSONObject jsonObject = new JSONObject(result.replace("\\", ""));
+                    if(jsonObject.getInt("result") == 1){
+                        try{
+                            Thread.sleep(2000);
+                        }catch (InterruptedException e){
+                            Log.e("Thread sleep error", e.toString());
+                        }
+                        ft = getFragmentManager().beginTransaction();
+                        fragmentPrompt = new FragmentPrompt();
+                        ft.add(fragmentPrompt, "FragmentPrompt");
+                        ft.commit();
+                        ft.show(fragmentPrompt);
+                    }else
+                        Toast.makeText(getApplicationContext(), "Login failure", Toast.LENGTH_SHORT).show();
+                }catch (JSONException e){
+                    Log.e("checkin error", e.toString());
+                }
             }
         });
     }
 
     private void checkOut() {
-        apiCaller.setAPI(urlBase, "/checkout.php", "?userid=" + userId, Request.Method.GET); //check out
+        apiCaller.setAPI(urlBase, "/checkin.php", "?userid=" + userId + "&cmd=checkout", Request.Method.GET); //check out
         apiCaller.execAPI(new APICaller.VolleyCallback() {
             @Override
             public void onDelivered(String result) {
@@ -161,7 +187,6 @@ public class ActivityMain extends ActivityBeaconDetectionByRECO implements View.
 
     public void shareToOthers(){ //this method is used in fragment_prompt
         //waitForClickEventOnPrompt.cancel();
-        //
         checkOut();
     }
 

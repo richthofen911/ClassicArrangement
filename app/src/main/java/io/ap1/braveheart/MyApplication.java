@@ -16,7 +16,7 @@ public class MyApplication extends Application {
 
     public void onCreate(){
         super.onCreate();
-        appSettings = new AppSettings(getApplicationContext());
+        //appSettings = new AppSettings(getApplicationContext());  BraveHeart doesn't use AppSettings module temporarily
         mRequestQueue = MySingletonRequestQueue.getInstance(this);
         apiCaller = APICaller.getInstance(this, mRequestQueue);
     }

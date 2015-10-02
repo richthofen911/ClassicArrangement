@@ -9,11 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,8 +35,10 @@ public class ActivityLogin extends AppCompatActivity {
 
         tvLoggingIn = (TextView) findViewById(R.id.tv_loggingIn);
 
+
         if(((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo() == null)
             Toast.makeText(getApplicationContext(), "Network is currently unavailable", Toast.LENGTH_SHORT).show();
+
         spLoginStatus = getApplication().getSharedPreferences("LoginStatus", 0);
         isLogin = spLoginStatus.getString("isLogin", "no");
 
@@ -89,6 +89,7 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
     private void checkAppSettings(final String userId){
+        /*
         final AppSettings appSettings = new AppSettings(getApplicationContext());
         appSettings.initSettings();
         Thread countTime = new Thread(new Runnable() {
@@ -101,13 +102,14 @@ public class ActivityLogin extends AppCompatActivity {
                 }
                 if(!appSettings.hasHadResponseDelivered())//if AppSettings didn't get right result, cancel it
                     appSettings.cancelSettingsRequest(); //but don't forget it deal with it in the Main Activity
+        */
                 startActivity(new Intent(ActivityLogin.this, ActivityMain.class)
-                        .putExtra("networkStatus", appSettings.getNetworkStatus())
+        //                .putExtra("networkStatus", appSettings.getNetworkStatus())
                         .putExtra("UserID", userId));
                 finish();
-            }
-        });
-        countTime.start();
+        //    }
+        //});
+        //countTime.start();
     }
 
     class MyJavaScriptInterface{
